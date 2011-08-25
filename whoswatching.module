@@ -1,0 +1,127 @@
+<?php
+/**
+ *
+ *
+ * @param unknown $node   (reference)
+ * @param unknown $op
+ * @param unknown $teaser
+ * @param unknown $page
+ */
+
+
+function whoswatching_nodeapi(&$node, $op, $teaser, $page) {
+	if (isLoggedIn()) {
+		switch ($op) {
+		case 'load':
+			db_query('DELETE FROM {whoswatching_entry} WHERE nid = %d AND uid = %d' ,  $node->nid , $GLOBALS['user']->uid);
+			break;
+
+		case 'view':
+			db_query('INSERT INTO {whoswatching_entry} (nid, uid, timestamp) VALUES (%d, %d ,%d)' ,  $node->nid , $GLOBALS['user']->uid, time());
+			break;
+		}
+	}
+}
+
+
+/**
+ *
+ *
+ * @param unknown $op
+ * @param unknown $edit     (reference)
+ * @param unknown $account  (reference)
+ * @param unknown $category (optional)
+ */
+function whoswatching_user($op, &$edit, &$account, $category = NULL) {
+	if (isLoggedIn()) {
+		switch ($op) {
+		case 'logout':
+			db_query('DELETE FROM {whoswatching_entry}  WHERE  uid = %d' , $GLOBALS['user']->uid);
+			break;
+		}
+	}
+
+}
+
+
+
+/**
+ *
+ *
+ * @param unknown $op    (optional)
+ * @param unknown $delta (optional)
+ * @param unknown $edit  (optional)
+ * @return unknown
+ */
+function whoswatching_block($op = 'list', $delta = 0, $edit = array()) {
+
+
+	switch ($op) {
+	case 'list':
+		$blocks[0] = array('info' => t('Whoswatching'),
+			'status'     => TRUE,
+			'weight'     => 0,
+			'visibility' => 1,
+			'pages'      => 'node/*',
+		);
+		return $blocks;
+
+	case 'configure':
+		$form = array();
+		return $form;
+
+	case 'view': default:
+		$block['subject'] = t('who is watching this node');
+		$block['content'] = whoswatching_block_contents();
+		return $block;
+	}
+}
+
+
+
+/**
+ *
+ *
+ * @return unknown
+ */
+function whoswatching_block_contents() {
+
+	if (arg(0) == 'node' && is_numeric(arg(1)))
+		$nid = arg(1);
+		
+	$uid = $GLOBALS['user']->uid;
+
+	$items = array();
+
+	$result = db_query("SELECT uid FROM {whoswatching_entry} WHERE nid = %d", $nid);
+
+	while ($row = db_fetch_object($result)) {
+		$items[] = userLink($uid);
+	}
+
+	return  theme_item_list($items);
+}
+
+
+/**
+ *
+ *
+ * @param unknown $uid
+ * @return unknown
+ */
+function userLink($uid) {
+	return l(user_load(array('uid' => $uid))->name, 'user/' . $uid);
+}
+
+
+/**
+ *
+ *
+ * @return unknown
+ */
+function isLoggedIn() {
+	return $GLOBALS['user']->uid;
+}
+
+
+?>

@@ -1,0 +1,7 @@
+; $Id$
+name = Who is watching
+description = A module that displays who is watching the current node
+core = 6.x
+
+
+version = "6.x-0.11"

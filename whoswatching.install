@@ -1,0 +1,28 @@
+<?php
+// $Id$
+
+
+function whoswatching_install() {
+    drupal_install_schema('whoswatching');
+    db_query("DELETE FROM {cache}");
+}
+
+
+function whoswatching_uninstall() {
+	drupal_uninstall_schema('whoswatching');	
+}
+
+function whoswatching_schema() {
+    $schema['whoswatching_entry'] = array(
+        'fields' => array(
+            'id' => array('type' => 'serial','unsigned' => true,'not null' => true),         
+            'timestamp' => array('type' => 'int', 'not null' => TRUE, 'default' => 0),
+            'uid'  => array('type' => 'int', 'not null' => TRUE, 'default' => 0),    
+            'nid'  => array('type' => 'int', 'not null' => TRUE, 'default' => 0),  
+        ),
+        'primary key' => array('id') 
+    );
+   
+    return $schema;
+}
+?>
